@@ -1,6 +1,9 @@
 
 import Page0 from "../app/page.tsx";
 
+
+import Page1 from "../app/layout.tsx";
+
 const clientInit = { init: () => {}, after: () => {} };
 
 
@@ -100,9 +103,11 @@ window.loadFunction = () => {
 	const initResponse = window.initResponse ? window.initResponse : typeof clientInit.init == "function" ? clientInit.init(buildProps()) || {} : {};
 	if(!window.initResponse) window.initResponse = initResponse;
 
-	if(typeof Page0.beforeBuildStart == "function") Page0.beforeBuildStart(buildProps());
+	if(typeof Page1.beforeBuildStart == "function") Page1.beforeBuildStart(buildProps());
+if(typeof Page0.beforeBuildStart == "function") Page0.beforeBuildStart(buildProps());
 	
 	let page0 = new Page0();
+let page1 = new Page1();
 
 	if(window.lastPage && Page0.inheritState !== false) page0._inheritState(window.lastPage);
 
@@ -113,20 +118,31 @@ window.loadFunction = () => {
 	page0._beforeInit();
 page0.emit('beforeInit', { component: page0, props: buildProps() });
 page0.initState(buildProps());
+page1._beforeInit();
+page1.emit('beforeInit', { component: page1, props: buildProps() });
+page1.initState(buildProps());
 
 	page0.emit('initState', { component: page0, props: buildProps() });
 let made0 = page0.make(buildProps({init: initResponse, page: null}));
 page0.emit('buildStart', { widget: made0, component: page0, props: buildProps() });
+page1.emit('initState', { component: page1, props: buildProps() });
+let made1 = page1.make(buildProps({init: initResponse, page: made0}));
+page1.emit('buildStart', { widget: made1, component: page1, props: buildProps() });
 
-	
+	if(Page0.layouts === false){
 		made0.to(document.body);
 		page0.afterBuild(buildProps({page: made0}), ...(Array.isArray(buildProps().args) ? buildProps().args : []));
 		page0.emit('buildEnd', { widget: made0, component: page0, props: buildProps() });
-	
+	} else {
+		;page0.afterBuild(buildProps({page: made0}), ...(Array.isArray(buildProps().args) ? buildProps().args : []));page0.emit('buildEnd', { widget: made0, component: page0, props: buildProps() });
+made1.to(document.body);page1.afterBuild(buildProps({page: made0}), ...(Array.isArray(buildProps().args) ? buildProps().args : []));page1.emit('buildEnd', { widget: made1, component: page1, props: buildProps() });
+		
+	}
 
 	
 
-	pages.push(page0);
+	pages.push(page0)
+pages.push(page1);
 	window.lastPage = page0;
 
 	if(typeof clientInit.after == "function" && !window.initted) clientInit.after(buildProps({page: made0}));
